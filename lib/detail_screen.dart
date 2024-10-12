@@ -15,6 +15,7 @@ class DetailScreen extends StatefulWidget {
 
 class _DetailScreenState extends State<DetailScreen> {
   double _currentRating = 0.0;
+  double _averageRating = 0.0;
 
   @override
   void initState() {
@@ -27,6 +28,7 @@ class _DetailScreenState extends State<DetailScreen> {
     double? savedRating = prefs.getDouble('rating_${widget.webtoon.title}');
     setState(() {
       _currentRating = savedRating ?? 0.0;
+      _averageRating = savedRating ?? 0.0;
     });
   }
 
@@ -42,58 +44,61 @@ class _DetailScreenState extends State<DetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(widget.webtoon.title)),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Image.asset(widget.webtoon.thumbnailUrl),
-              SizedBox(height: 10),
-              Text(
-                widget.webtoon.description,
-                style: TextStyle(fontSize: 16),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Image.asset(widget.webtoon.thumbnailUrl),
+            SizedBox(height: 10),
+            Text(
+              widget.webtoon.description,
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 20),
+            Text(
+              'Your Rating:',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            RatingBar.builder(
+              initialRating: _currentRating,
+              minRating: 1,
+              direction: Axis.horizontal,
+              allowHalfRating: true,
+              itemCount: 5,
+              itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
+              itemBuilder: (context, _) => Icon(
+                Icons.star,
+                color: Colors.amber,
               ),
-              SizedBox(height: 20),
-              Text(
-                'Your Rating:',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              RatingBar.builder(
-                initialRating: _currentRating,
-                minRating: 1,
-                direction: Axis.horizontal,
-                allowHalfRating: true,
-                itemCount: 5,
-                itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
-                itemBuilder: (context, _) => Icon(
-                  Icons.star,
-                  color: Colors.amber,
-                ),
-                onRatingUpdate: (rating) {
-                  _saveRating(rating);
-                },
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () async {
-                  List<Webtoon> favorites = await FavoriteManager.loadFavorites();
-                  if (!favorites.contains(widget.webtoon)) {
-                    favorites.add(widget.webtoon);
-                    await FavoriteManager.saveFavorites(favorites);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Added to Favorites!')),
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Already in Favorites!')),
-                    );
-                  }
-                },
-                child: Text('Add to Favorites'),
-              ),
-            ],
-          ),
+              onRatingUpdate: (rating) {
+                _saveRating(rating);
+              },
+            ),
+            SizedBox(height: 20),
+            Text(
+              'Average Rating: $_averageRating',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () async {
+                List<Webtoon> favorites = await FavoriteManager.loadFavorites();
+                if (!favorites.contains(widget.webtoon)) {
+                  favorites.add(widget.webtoon);
+                  await FavoriteManager.saveFavorites(favorites);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Added to Favorites!')),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Already in Favorites!')),
+                  );
+                }
+              },
+              child: Text('Add to Favorites'),
+            ),
+          ],
         ),
       ),
     );
